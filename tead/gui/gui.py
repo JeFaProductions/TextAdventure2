@@ -10,6 +10,8 @@ class ReadonlyText(tk.Frame):
         self.text.config(state="disabled")
         self.text.config(borderwidth=5, selectbackground="white")
 
+        self.text.bind("<Double-Button-1>", lambda e: "break")
+
         self.text.pack()
 
     def put(self, text):
@@ -40,10 +42,34 @@ class TextInput(tk.Frame):
 
         self.text = tk.Text(self)
 
-        self.text.config(bg="black", fg="white", borderwidth=5, height=1)
+        self.text.config(bg="black", fg="white", borderwidth=5, height=1, wrap="none")
+        self.text.config(insertbackground="white", insertunfocussed="solid")
         self.text.insert(0.0, "> ")
 
         self.text.pack()
+
+        self.text.bind("<Return>", self.onEnter)
+        self.text.bind("<BackSpace>", self.onLeft)
+        self.text.bind("<Left>", self.onLeft)
+        self.text.bind("<Button-1>", self.onClick)
+        self.text.bind("<Double-Button-1>", self.onClick)
+        self.text.bind("<B1-Motion>", self.onClick)
+
+    def onEnter(self, event):
+        return "break"
+
+    def onLeft(self, event):
+        index = self.getIndex(event.x, event.y)
+        if index == 1.2:
+            return "break"
+
+    def onClick(self, event):
+        index = float(self.text.index("@" + str(event.x) + "," + str(event.y)))
+        if index <= 1.1:
+            return "break"
+
+    def getIndex(self, x, y):
+        return float(self.text.index("@" + str(x) + "," + str(y)))
 
 
 class MainWindow(tk.Frame):
