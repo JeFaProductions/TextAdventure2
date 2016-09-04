@@ -26,8 +26,6 @@ class TextOutput(ReadonlyText):
 
         self.put("> Hello" + "\r\n")
 
-        self.pack(side="left")
-
 
 class Inventory(ReadonlyText):
     def __init__(self, master=None):
@@ -35,20 +33,17 @@ class Inventory(ReadonlyText):
 
         self.text.config(height=20)
 
-        self.pack(side="right")
-
 
 class TextInput(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
 
-        self.text = tk.Text()
+        self.text = tk.Text(self)
 
         self.text.config(bg="black", fg="white", borderwidth=5, height=1)
         self.text.insert(0.0, "> ")
 
-        self.text.pack(side="bottom", expand=1)
-        self.pack(expand=1)
+        self.text.pack()
 
 
 class MainWindow(tk.Frame):
@@ -69,10 +64,13 @@ class MainWindow(tk.Frame):
 
         topframe = tk.Frame(self)
         self.textout = TextOutput(topframe)
+        self.textout.pack(side="left")
         self.inventory = Inventory(topframe)
-        topframe.pack()
+        self.inventory.pack(side="right")
+        topframe.pack(side="top")
 
         self.textin = TextInput(self)
+        self.textin.pack(side="bottom")
 
         self.pack()
 
