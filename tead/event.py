@@ -62,4 +62,3 @@ class EventSystem:
             
             for cb in self._eventHandlers[event.type]:
                 cb(event)
-            
