@@ -1,4 +1,5 @@
 import tkinter as tk
+import os.path
 
 # Global "theme" for all widgets.
 conf = dict(
@@ -138,12 +139,15 @@ class InfoBar(tk.Frame):
 
 
 class MainWindow(tk.Frame):
+    ICON_FILE = "../res/icon.ico"
+
     def __init__(self, master=None):
         super().__init__(master)
 
         self.config(bg="black")
 
         self.master.title("TEAD")
+        self.master.iconbitmap(os.path.normpath(self.ICON_FILE))
         self.master.geometry('{}x{}'.format(800, 600))
 
         self.infobar = None
