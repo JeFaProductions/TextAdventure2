@@ -68,6 +68,9 @@ class TextInput(tk.Frame):
     def setOnEnter(self, fun):
         self.onEnterFun = fun
 
+    def focus(self):
+        self.text.focus()
+
 
 class Prompt(tk.Text):
     DEFAULT_PROMPT = ">"
@@ -158,7 +161,10 @@ class MainWindow(tk.Frame):
 
         self.setupframes()
 
+        self.textin.focus()
+
         self.master.bind("<Escape>", self._onEscape)
+        self.master.bind("<Tab>", self._onTab)
 
     def setupframes(self):
         self.master.config(bg="black", borderwidth=1)
@@ -203,6 +209,9 @@ class MainWindow(tk.Frame):
 
     def _onEscape(self, event):
         self.master.quit()
+
+    def _onTab(self, event):
+        pass
 
     def set(self, onenter):
         self.textin.setOnEnter(onenter)
