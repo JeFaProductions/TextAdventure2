@@ -1,5 +1,10 @@
 import tkinter as tk
-from tkinter import font
+
+# Global "theme" for all widgets.
+conf = dict(
+    bg="black", fg="white", selectbackground="grey", insertbackground="white",
+    borderwidth=5, font="System 8 bold")
+
 
 class ReadonlyText(tk.Frame):
     lb = "\r\n"
@@ -7,13 +12,10 @@ class ReadonlyText(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
 
-        font = tk.font.Font(family="Courier", size=12, weight="bold")
-
         self.text = tk.Text(self)
-        self.text.config(bg="black", fg="white", selectbackground="grey", insertbackground="white")
-        self.text.config(state="disabled", borderwidth=5, wrap=tk.WORD, font=font)
 
-        self.text.bind("<Double-Button-1>", lambda e: "break")
+        self.text.config(state="disabled", wrap=tk.WORD)
+        self.text.config(**conf)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -36,53 +38,51 @@ class Inventory(ReadonlyText):
     def __init__(self, master=None):
         super().__init__(master)
 
+        self.put("inventory")
+
 
 class TextInput(tk.Frame):
-    prompt = "> "
-
     def __init__(self, master=None):
         super().__init__(master)
 
         self.text = tk.Text(self)
 
-        self.text.config(bg="black", fg="white", insertbackground="white", insertunfocussed="solid")
-        self.text.config(borderwidth=5, height=1, wrap="none")
-        # self.text.insert(0.0, self.prompt)
+        self.text.config(height=1, wrap="none")
+        self.text.config(**conf)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.text.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
         self.text.bind("<Return>", self._onEnter)
-        # self.text.bind("<BackSpace>", self._onLeft)
-        # self.text.bind("<Left>", self._onLeft)
-        # self.text.bind("<Button-1>", self._onClick)
-        # self.text.bind("<Double-Button-1>", self._onClick)
-        # self.text.bind("<B1-Motion>", self._onClick)
 
-        self.onEnterfun = None
+        self.onEnterFun = None
 
     def _onEnter(self, event):
-        if self.onEnterfun is not None:
-            pass  # self.onEnterfun(self.text.)
-        else:
-            return "break"
-
-    # def _onLeft(self, event):
-    #     index = self._getIndex(event.x, event.y)
-    #     if index == 1.2:
-    #         return "break"
-
-    # def _onClick(self, event):
-    #     index = float(self.text.index("@" + str(event.x) + "," + str(event.y)))
-    #     if index <= 1.1:
-    #         return "break"
-    #
-    # def _getIndex(self, x, y):
-    #     return float(self.text.index("@" + str(x) + "," + str(y)))
+        if self.onEnterFun is not None:
+            self.onEnterFun(self.text.get(1.0, tk.END))
+            self.text.delete(1.0, tk.END)
+        return "break"
 
     def setOnEnter(self, fun):
-        self.onEnterfun = fun
+        self.onEnterFun = fun
+
+
+class Prompt(tk.Text):
+    DEFAULT_PROMPT = ">"
+
+    def __init__(self, master=None):
+        super().__init__(master)
+
+        self.setPrompt(self.DEFAULT_PROMPT)
+
+        self.config(width=2, height=1, state="disabled")
+        self.config(**conf)
+
+    def setPrompt(self, prompt):
+        if len(prompt) is 1:
+            self.delete(1.0, tk.END)
+            self.insert(1.0, prompt)
 
 
 class InfoBar(tk.Frame):
@@ -91,42 +91,50 @@ class InfoBar(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
 
-        self.config(height=20)
-        self.config(bg=self.bgcolor, borderwidth=5)
+        self.config(height=20, bg=self.bgcolor)
 
-        self.info1 = tk.Label(self)
-        self.info1.config(text="Hello", bg=self.bgcolor)
-        self.info1.grid(row=0, column=0, sticky=tk.W)
+        self.infoleft = tk.Label(self)
+        self.infoleft.config(bg=self.bgcolor, font=conf["font"])
+        self.infoleft.grid(row=0, column=0, sticky=tk.W)
 
-        self.info2 = tk.Label(self)
-        self.info2.config(text="HI", bg=self.bgcolor)
-        self.info2.grid(row=0, column=1)
+        self.inforight = tk.Label(self)
+        self.inforight.config(bg=self.bgcolor, font=conf["font"])
+        self.inforight.grid(row=0, column=1)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
 
-        self.setupevents()
+        self.outleft("Text Adventure 2")
+        self.outright("GUI prototype")
 
-    def setupevents(self):
+        self._setupevents()
+
+    def _setupevents(self):
         # Move window
-        self.bind("<ButtonPress-1>", self.startMove)
-        self.bind("<ButtonRelease-1>", self.stopMove)
-        self.bind("<B1-Motion>", self.onMotion)
+        self.bind("<ButtonPress-1>", self._startMove)
+        self.bind("<ButtonRelease-1>", self._stopMove)
+        self.bind("<B1-Motion>", self._onMotion)
 
-    def startMove(self, event):
+    def _startMove(self, event):
         self.x = event.x
         self.y = event.y
 
-    def stopMove(self, event):
+    def _stopMove(self, event):
         self.x = None
         self.y = None
 
-    def onMotion(self, event):
+    def _onMotion(self, event):
         deltax = event.x - self.x
         deltay = event.y - self.y
         x = self.winfo_toplevel().winfo_x() + deltax
         y = self.winfo_toplevel().winfo_y() + deltay
         self.winfo_toplevel().geometry("+%s+%s" % (x, y))
+
+    def outleft(self, text):
+        self.infoleft.config(text=text)
+
+    def outright(self, text):
+        self.inforight.config(text=text)
 
 
 class MainWindow(tk.Frame):
@@ -135,16 +143,18 @@ class MainWindow(tk.Frame):
 
         self.config(bg="black")
 
-        # self.master.overrideredirect(True)
         self.master.title("TEAD")
         self.master.geometry('{}x{}'.format(800, 600))
 
+        self.infobar = None
         self.textout = None
         self.inventory = None
+        self.textprompt = None
+        self.textin = None
 
         self.setupframes()
 
-        self.master.bind("<Escape>", self.onEscape)
+        self.master.bind("<Escape>", self._onEscape)
 
     def setupframes(self):
         self.master.config(bg="black", borderwidth=1)
@@ -179,11 +189,7 @@ class MainWindow(tk.Frame):
         bottomframe = tk.Frame(self)
         bottomframe.columnconfigure(1, weight=1)
 
-        self.textprompt = tk.Text(bottomframe)
-        self.textprompt.insert(0.0, ">")
-        self.textprompt.config(width=2, height=1, bg="black", fg="white",
-                               insertbackground="white", insertunfocussed="solid",
-                               borderwidth=5, state="disabled")
+        self.textprompt = Prompt(bottomframe)
         self.textprompt.grid(row=0, column=0)
 
         self.textin = TextInput(bottomframe)
@@ -191,10 +197,20 @@ class MainWindow(tk.Frame):
 
         bottomframe.grid(row=2, column=0, sticky=tk.N + tk.E + tk.W + tk.S)
 
-    def onEscape(self, event):
+    def _onEscape(self, event):
         self.master.quit()
 
+    def set(self, onenter):
+        self.textin.setOnEnter(onenter)
 
-root = tk.Tk()
-gui = MainWindow(root)
-gui.mainloop()
+    def output(self, text):
+        self.textout.put(text)
+
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    gui = MainWindow(root)
+
+    gui.set(lambda text: gui.output(text))
+
+    gui.mainloop()
