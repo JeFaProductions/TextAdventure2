@@ -1,10 +1,11 @@
 import tkinter as tk
 import os.path
+import pyfiglet
 
 # Global "theme" for all widgets.
 conf = dict(
     bg="black", fg="white", selectbackground="grey", insertbackground="white",
-    borderwidth=5, font="System 8 bold", highlightthickness=0, highlightbackground="yellow",
+    borderwidth=5, font="Courier 8 bold", highlightthickness=0, highlightbackground="yellow",
     inactiveselectbackground="grey")
 
 
@@ -35,8 +36,6 @@ class ReadonlyText(tk.Frame):
 class TextOutput(ReadonlyText):
     def __init__(self, master=None):
         super().__init__(master)
-
-        self.put("> Hello" + self.lb)
 
 
 class Inventory(ReadonlyText):
@@ -150,8 +149,10 @@ class Prompt(tk.Text):
 
     def setPrompt(self, prompt):
         if len(prompt) is 1:
-            self.delete(1.0, tk.END)
-            self.insert(1.0, prompt)
+            self.config(state="normal")
+            self.delete("1.0", "1.end")
+            self.insert("1.0", prompt)
+            self.config(state="disabled")
 
 
 class InfoBar(tk.Frame):
@@ -215,6 +216,7 @@ class InfoBar(tk.Frame):
 
 
 class MainWindow(tk.Frame):
+    # TODO: Make accessible from root directory
     ICON_FILE = "../res/icon.ico"
 
     def __init__(self, master=None):
@@ -281,6 +283,8 @@ class MainWindow(tk.Frame):
     def setupevents(self):
         self.master.bind("<Escape>", self._onEscape)
         self.textin.text.bind("<Tab>", self._onTab)
+        self.textin.text.bind("<FocusIn>", self._onTextinFocus)
+        self.inventory.text.bind("<FocusIn>", self._onInventoryFocus)
 
     def _onEscape(self, event):
         self.master.quit()
@@ -288,21 +292,41 @@ class MainWindow(tk.Frame):
     def _onTab(self, event):
         if self.textin.text.focus_get():
             self.inventory.focus()
-        else:
-            self.textin.focus()
         return "break"
 
-    def set(self, onenter):
+    def _onTextinFocus(self, event):
+        self.textprompt.setPrompt(">")
+
+    def _onInventoryFocus(self, event):
+        self.textprompt.setPrompt("#")
+
+    def set(self, onenter, welcome_text):
         self.textin.setOnEnter(onenter)
+        self.textout.put(welcome_text)
 
     def output(self, text):
         self.textout.put(text)
+
+
+def loadwelcome(file):
+    with open(file) as f:
+        text = f.read()
+    return text
 
 
 if __name__ == '__main__':
     root = tk.Tk()
     gui = MainWindow(root)
 
-    gui.set(lambda text: gui.output(text))
+
+    def handle(text):
+        if text.rstrip() == "start":
+            figlet = pyfiglet.Figlet("starwars")
+            gui.output(figlet.renderText("nope"))
+            gui.output("\r\n")
+
+
+    welcomefile = "../res/welcome_text"
+    gui.set(handle, loadwelcome(welcomefile))
 
     gui.mainloop()
