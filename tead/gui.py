@@ -4,7 +4,8 @@ import os.path
 # Global "theme" for all widgets.
 conf = dict(
     bg="black", fg="white", selectbackground="grey", insertbackground="white",
-    borderwidth=5, font="System 8 bold")
+    borderwidth=5, font="System 8 bold", highlightthickness=0, highlightbackground="yellow",
+    inactiveselectbackground="grey")
 
 
 class ReadonlyText(tk.Frame):
@@ -27,6 +28,9 @@ class ReadonlyText(tk.Frame):
         self.text.insert("end", text)
         self.text.config(state="disabled")
 
+    def putln(self, text):
+        self.put(text + self.lb)
+
 
 class TextOutput(ReadonlyText):
     def __init__(self, master=None):
@@ -39,7 +43,65 @@ class Inventory(ReadonlyText):
     def __init__(self, master=None):
         super().__init__(master)
 
-        self.put("inventory")
+        self.selectedrow = 1
+
+        self.putln("inventory item 1")
+        self.putln("inventory item 2")
+        self.putln("inventory item 3")
+
+        self.text.bind("<Down>", self._onDown)
+        self.text.bind("<Up>", self._onUp)
+        self.text.bind("<Right>", lambda e: "break")
+        self.text.bind("<Left>", lambda e: "break")
+        self.text.bind("<Button-1>", lambda e: "break")
+        self.text.bind("<Double-Button-1>", lambda e: "break")
+        self.text.bind("<B1-Motion>", lambda e: "break")
+
+        # self.text.tag_add("sel", "1.0", "1.end")
+
+        self._rowmark()
+
+    def _getrowrange(self, row):
+        """
+        Returns the from and to index for the desired row.
+
+        :param row: String with the desired row.
+        :return: List with from and to index.
+        """
+        fromindex = row + ".0"
+        toindex = row + ".end"
+        return [fromindex, toindex]
+
+    def _rowmark(self, row=1):
+        """
+        Sets the new row mark.
+
+        :param row: New row number as integer.
+        """
+        old = self._getrowrange(str(self.selectedrow))
+        new = self._getrowrange(str(row))
+
+        self.text.tag_remove("sel", old[0], old[1])
+        self.text.tag_add("sel", new[0], new[1])
+
+        self.selectedrow = row
+
+    def _onUp(self, event):
+        if self.selectedrow != 1:
+            self._rowmark(self.selectedrow - 1)
+        return "break"
+
+    def _onDown(self, event):
+        end = int(float(self.text.index("end"))) - 2
+        if self.selectedrow < end:
+            self._rowmark(self.selectedrow + 1)
+        return "break"
+
+    def focus(self):
+        """
+        Sets the focus to the text field.
+        """
+        self.text.focus()
 
 
 class TextInput(tk.Frame):
@@ -69,6 +131,9 @@ class TextInput(tk.Frame):
         self.onEnterFun = fun
 
     def focus(self):
+        """
+        Sets the focus to the text input field.
+        """
         self.text.focus()
 
 
@@ -101,14 +166,19 @@ class InfoBar(tk.Frame):
         self.infoleft.config(bg=self.bgcolor, font=conf["font"])
         self.infoleft.grid(row=0, column=0, sticky=tk.W)
 
+        self.infocenter = tk.Label(self)
+        self.infocenter.config(bg=self.bgcolor, font=conf["font"])
+        self.infocenter.grid(row=0, column=1)
+
         self.inforight = tk.Label(self)
         self.inforight.config(bg=self.bgcolor, font=conf["font"])
-        self.inforight.grid(row=0, column=1)
+        self.inforight.grid(row=0, column=2, sticky=tk.E)
 
         self.rowconfigure(0, weight=1)
-        self.columnconfigure(0, weight=1)
+        self.columnconfigure(1, weight=1)
 
-        self.outleft("Text Adventure 2")
+        self.outleft("https://github.com/JeFaProductions/TextAdventure2")
+        self.outcenter("Text Adventure 2")
         self.outright("GUI prototype")
 
         self._setupevents()
@@ -137,6 +207,9 @@ class InfoBar(tk.Frame):
     def outleft(self, text):
         self.infoleft.config(text=text)
 
+    def outcenter(self, text):
+        self.infocenter.config(text=text)
+
     def outright(self, text):
         self.inforight.config(text=text)
 
@@ -160,11 +233,9 @@ class MainWindow(tk.Frame):
         self.textin = None
 
         self.setupframes()
+        self.setupevents()
 
         self.textin.focus()
-
-        self.master.bind("<Escape>", self._onEscape)
-        self.master.bind("<Tab>", self._onTab)
 
     def setupframes(self):
         self.master.config(bg="black", borderwidth=1)
@@ -207,11 +278,19 @@ class MainWindow(tk.Frame):
 
         bottomframe.grid(row=2, column=0, sticky=tk.N + tk.E + tk.W + tk.S)
 
+    def setupevents(self):
+        self.master.bind("<Escape>", self._onEscape)
+        self.textin.text.bind("<Tab>", self._onTab)
+
     def _onEscape(self, event):
         self.master.quit()
 
     def _onTab(self, event):
-        pass
+        if self.textin.text.focus_get():
+            self.inventory.focus()
+        else:
+            self.textin.focus()
+        return "break"
 
     def set(self, onenter):
         self.textin.setOnEnter(onenter)
