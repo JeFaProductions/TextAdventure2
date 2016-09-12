@@ -1,6 +1,5 @@
 import tkinter as tk
 import os.path
-import pyfiglet
 
 # Global "theme" for all widgets.
 conf = dict(
@@ -217,7 +216,7 @@ class InfoBar(tk.Frame):
 
 class MainWindow(tk.Frame):
     # TODO: Make accessible from root directory
-    ICON_FILE = "../res/icon.ico"
+    ICON_FILE = "res/icon.ico"
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -313,20 +312,3 @@ def loadwelcome(file):
         text = f.read()
     return text
 
-
-if __name__ == '__main__':
-    root = tk.Tk()
-    gui = MainWindow(root)
-
-
-    def handle(text):
-        if text.rstrip() == "start":
-            figlet = pyfiglet.Figlet("starwars")
-            gui.output(figlet.renderText("nope"))
-            gui.output("\r\n")
-
-
-    welcomefile = "../res/welcome_text"
-    gui.set(handle, loadwelcome(welcomefile))
-
-    gui.mainloop()
