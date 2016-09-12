@@ -7,8 +7,8 @@ conf = dict(
     borderwidth=5, font="Courier 8 bold", highlightthickness=0, highlightbackground="yellow",
     inactiveselectbackground="grey")
 
-class ReadonlyText(tk.Frame):
 
+class ReadonlyText(tk.Frame):
     def __init__(self, master=None):
         super().__init__(master)
 
@@ -41,9 +41,9 @@ class Inventory(ReadonlyText):
 
         self.selectedrow = 1
 
-        self.putln("inventory item 1")
-        self.putln("inventory item 2")
-        self.putln("inventory item 3")
+        self.addItem("inventory item 1")
+        self.addItem("inventory item 2")
+        self.addItem("inventory item 3")
 
         self.text.bind("<Down>", self._onDown)
         self.text.bind("<Up>", self._onUp)
@@ -98,6 +98,13 @@ class Inventory(ReadonlyText):
         Sets the focus to the text field.
         """
         self.text.focus()
+
+    def addItem(self, name):
+        self.putln(name)
+
+        # def deleteItem(self, name):
+        #     pos = self.text.search(name, "1.0", "end")
+        #     self.text.delete(pos, "end")
 
 
 class TextInput(tk.Frame):
@@ -214,7 +221,8 @@ class InfoBar(tk.Frame):
 
 class MainWindow(tk.Frame):
     # TODO: Make accessible from root directory
-    ICON_FILE = "res/icon.ico"
+    ICON_FILE_WIN = "res/icon.ico"
+    ICON_FILE_LINUX = "res/icon.xbm"
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -222,8 +230,12 @@ class MainWindow(tk.Frame):
         self.config(bg="black")
 
         self.master.title("TEAD")
-        # TODO error on Mint 18
-        # self.master.iconbitmap(os.path.normpath(self.ICON_FILE))
+
+        if os.name == "nt":
+            self.master.wm_iconbitmap(bitmap=os.path.normpath(self.ICON_FILE_WIN))
+        else:
+            self.master.wm_iconbitmap(bitmap="@" + os.path.normpath(self.ICON_FILE_LINUX))
+
         self.master.geometry('{}x{}'.format(800, 600))
 
         self.infobar = None
@@ -306,4 +318,3 @@ class MainWindow(tk.Frame):
 
     def output(self, text):
         self.textout.put(text)
-
