@@ -29,18 +29,20 @@ class CommandParser:
         self._gui.output(os.linesep)
 
     def _cmdHelp(self, args):
+        ljustLen = 10
         lines = ['',
                  'Controls:',
                  '',
-                 '<escape>  -- quit game',
-                 '<tab>     -- switch between inventory and command line',
-                 '<return>  -- enter command',
+                 '<escape>'.ljust(ljustLen) + '-- quit game',
+                 '<tab>'.ljust(ljustLen) + '-- switch between inventory and command line',
+                 '<return>'.ljust(ljustLen) + '-- enter command',
+                 '<arrows>'.ljust(ljustLen) + '-- navigate inventory',
                  '',
                  'Commands:',
                  '']
 
         for key, value in self._commands.items():
-            lines.append(key.ljust(10) + '-- ' + value.help)
+            lines.append(key.ljust(ljustLen) + '-- ' + value.help)
 
         lines.append('')
         self._gui.output(os.linesep.join(lines))

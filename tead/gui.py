@@ -1,13 +1,11 @@
 import tkinter as tk
-import os.path
-import tead.event
+import os
 
 # Global "theme" for all widgets.
 conf = dict(
     bg="black", fg="white", selectbackground="grey", insertbackground="white",
     borderwidth=5, font="Courier 8 bold", highlightthickness=0, highlightbackground="yellow",
     inactiveselectbackground="grey")
-
 
 class ReadonlyText(tk.Frame):
 
@@ -218,10 +216,9 @@ class MainWindow(tk.Frame):
     # TODO: Make accessible from root directory
     ICON_FILE = "res/icon.ico"
 
-    def __init__(self, eventSystem, master=None):
+    def __init__(self, master=None):
         super().__init__(master)
 
-        self._eventSystem = eventSystem
         self.config(bg="black")
 
         self.master.title("TEAD")
@@ -292,18 +289,6 @@ class MainWindow(tk.Frame):
         self.textin.text.bind("<Tab>", self._onTab)
         self.textin.text.bind("<FocusIn>", self._onTextinFocus)
         self.inventory.text.bind("<FocusIn>", self._onInventoryFocus)
-
-        # Game events
-        self.textin.setOnReturn(self._onReturn)
-
-    def _onReturn(self, text):
-        args = text.rstrip().lstrip().split()
-
-        # create Event that text was entered on console
-        self._eventSystem.createEvent(
-            tead.event.Event(tead.event.TEXT_ENTERED, {'args' : args}))
-
-        self._eventSystem.processEvents()
 
     def _onEscape(self, event):
         self.master.quit()
