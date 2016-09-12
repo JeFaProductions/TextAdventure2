@@ -8,5 +8,5 @@ if __name__ == '__main__':
     root = tk.Tk()
     gui = tead.gui.MainWindow(eventSystem, root)
     cmdParser = tead.command.CommandParser(eventSystem, gui)
-    
+
     gui.mainloop()

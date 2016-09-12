@@ -226,7 +226,7 @@ class MainWindow(tk.Frame):
 
         self.master.title("TEAD")
         # TODO error on Mint 18
-        #self.master.iconbitmap(os.path.normpath(self.ICON_FILE))
+        # self.master.iconbitmap(os.path.normpath(self.ICON_FILE))
         self.master.geometry('{}x{}'.format(800, 600))
 
         self.infobar = None
@@ -237,7 +237,7 @@ class MainWindow(tk.Frame):
 
         self.setupframes()
         self.setupevents()
-        
+
         welcomefile = "res/welcome_text"
         with open(welcomefile) as f:
             text = f.read()
@@ -292,17 +292,17 @@ class MainWindow(tk.Frame):
         self.textin.text.bind("<Tab>", self._onTab)
         self.textin.text.bind("<FocusIn>", self._onTextinFocus)
         self.inventory.text.bind("<FocusIn>", self._onInventoryFocus)
-        
+
         # Game events
         self.textin.setOnReturn(self._onReturn)
 
     def _onReturn(self, text):
         args = text.rstrip().lstrip().split()
-        
+
         # create Event that text was entered on console
         self._eventSystem.createEvent(
             tead.event.Event(tead.event.TEXT_ENTERED, {'args' : args}))
-        
+
         self._eventSystem.processEvents()
 
     def _onEscape(self, event):
