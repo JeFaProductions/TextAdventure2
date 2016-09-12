@@ -1,9 +1,10 @@
 import queue
 
-class Event:
+TEXT_ENTERED = 'textEntered'
+
+class Event:    
     
     def __init__(self, eventType='', userParam=dict()):
-        
         self.type = eventType
         self.userParam = userParam
         

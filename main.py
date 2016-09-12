@@ -1,20 +1,12 @@
 import tkinter as tk
-import pyfiglet
+import tead.event
 import tead.gui
+import tead.command
 
 if __name__ == '__main__':
+    eventSystem = tead.event.EventSystem()
     root = tk.Tk()
-    gui = tead.gui.MainWindow(root)
-
-
-    def handle(text):
-        if text.rstrip() == "start":
-            figlet = pyfiglet.Figlet("starwars")
-            gui.output(figlet.renderText("nope"))
-            gui.output("\r\n")
-
-
-    welcomefile = "res/welcome_text"
-    gui.set(handle, tead.gui.loadwelcome(welcomefile))
-
+    gui = tead.gui.MainWindow(eventSystem, root)
+    cmdParser = tead.command.CommandParser(eventSystem, gui)
+    
     gui.mainloop()

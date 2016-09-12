@@ -1,5 +1,6 @@
 import tkinter as tk
 import os.path
+import tead.event
 
 # Global "theme" for all widgets.
 conf = dict(
@@ -218,13 +219,15 @@ class MainWindow(tk.Frame):
     # TODO: Make accessible from root directory
     ICON_FILE = "res/icon.ico"
 
-    def __init__(self, master=None):
+    def __init__(self, eventSystem, master=None):
         super().__init__(master)
 
+        self._eventSystem = eventSystem
         self.config(bg="black")
 
         self.master.title("TEAD")
-        self.master.iconbitmap(os.path.normpath(self.ICON_FILE))
+        # TODO error on Mint 18
+        #self.master.iconbitmap(os.path.normpath(self.ICON_FILE))
         self.master.geometry('{}x{}'.format(800, 600))
 
         self.infobar = None
@@ -280,10 +283,24 @@ class MainWindow(tk.Frame):
         bottomframe.grid(row=2, column=0, sticky=tk.N + tk.E + tk.W + tk.S)
 
     def setupevents(self):
+        # GUI events
         self.master.bind("<Escape>", self._onEscape)
         self.textin.text.bind("<Tab>", self._onTab)
         self.textin.text.bind("<FocusIn>", self._onTextinFocus)
         self.inventory.text.bind("<FocusIn>", self._onInventoryFocus)
+        
+        # Game events
+        welcomefile = "res/welcome_text"
+        self.set(self._handleInput, loadwelcome(welcomefile))
+
+    def _handleInput(self, text):
+        args = text.rstrip().lstrip().split()
+        
+        # create Event that text was entered on console
+        self._eventSystem.createEvent(
+            tead.event.Event(tead.event.TEXT_ENTERED, {'args' : args}))
+        
+        self._eventSystem.processEvents()
 
     def _onEscape(self, event):
         self.master.quit()
