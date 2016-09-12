@@ -232,7 +232,7 @@ class InfoBar(tk.Frame):
 
 
 class MainWindow(tk.Frame):
-    # TODO: Make accessible from root directory
+
     ICON_FILE_WIN = "res/icon.ico"
     ICON_FILE_LINUX = "res/icon.xbm"
 
