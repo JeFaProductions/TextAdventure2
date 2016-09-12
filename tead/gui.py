@@ -21,6 +21,11 @@ class ReadonlyText(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.text.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
+    def delete(self, indexfrom, indexto):
+        self.text.config(state="normal")
+        self.text.delete(indexfrom, indexto)
+        self.text.config(state="disabled")
+
     def put(self, text):
         self.text.config(state="normal")
         self.text.insert("end", text)
@@ -44,6 +49,7 @@ class Inventory(ReadonlyText):
         self.addItem("inventory item 1")
         self.addItem("inventory item 2")
         self.addItem("inventory item 3")
+        self.deleteItem("inventory item 2")
 
         self.text.bind("<Down>", self._onDown)
         self.text.bind("<Up>", self._onUp)
@@ -102,9 +108,15 @@ class Inventory(ReadonlyText):
     def addItem(self, name):
         self.putln(name)
 
-        # def deleteItem(self, name):
-        #     pos = self.text.search(name, "1.0", "end")
-        #     self.text.delete(pos, "end")
+    def deleteItem(self, name):
+        pos = self.text.search(name, "1.0", "end")
+        if self.selectedrow == int(float(pos)):
+            if self.selectedrow > 1:
+                self._onUp()
+            else:
+                self._onDown()
+
+        self.delete(pos, pos + "+1lines")
 
 
 class TextInput(tk.Frame):
