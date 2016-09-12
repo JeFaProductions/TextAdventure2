@@ -10,7 +10,6 @@ conf = dict(
 
 
 class ReadonlyText(tk.Frame):
-    lb = "\r\n"
 
     def __init__(self, master=None):
         super().__init__(master)
@@ -30,7 +29,7 @@ class ReadonlyText(tk.Frame):
         self.text.config(state="disabled")
 
     def putln(self, text):
-        self.put(text + self.lb)
+        self.put(text + os.linesep)
 
 
 class TextOutput(ReadonlyText):
@@ -116,18 +115,18 @@ class TextInput(tk.Frame):
         self.columnconfigure(0, weight=1)
         self.text.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
-        self.text.bind("<Return>", self._onEnter)
+        self.text.bind("<Return>", self._onReturn)
 
-        self.onEnterFun = None
+        self._onReturnCB = None
 
-    def _onEnter(self, event):
-        if self.onEnterFun is not None:
-            self.onEnterFun(self.text.get(1.0, tk.END))
+    def _onReturn(self, event):
+        if self._onReturnCB is not None:
+            self._onReturnCB(self.text.get(1.0, tk.END))
             self.text.delete(1.0, tk.END)
         return "break"
 
-    def setOnEnter(self, fun):
-        self.onEnterFun = fun
+    def setOnReturn(self, cb):
+        self._onReturnCB = cb
 
     def focus(self):
         """
@@ -238,6 +237,11 @@ class MainWindow(tk.Frame):
 
         self.setupframes()
         self.setupevents()
+        
+        welcomefile = "res/welcome_text"
+        with open(welcomefile) as f:
+            text = f.read()
+        self.output(text)
 
         self.textin.focus()
 
@@ -290,10 +294,9 @@ class MainWindow(tk.Frame):
         self.inventory.text.bind("<FocusIn>", self._onInventoryFocus)
         
         # Game events
-        welcomefile = "res/welcome_text"
-        self.set(self._handleInput, loadwelcome(welcomefile))
+        self.textin.setOnReturn(self._onReturn)
 
-    def _handleInput(self, text):
+    def _onReturn(self, text):
         args = text.rstrip().lstrip().split()
         
         # create Event that text was entered on console
@@ -316,16 +319,6 @@ class MainWindow(tk.Frame):
     def _onInventoryFocus(self, event):
         self.textprompt.setPrompt("#")
 
-    def set(self, onenter, welcome_text):
-        self.textin.setOnEnter(onenter)
-        self.textout.put(welcome_text)
-
     def output(self, text):
         self.textout.put(text)
-
-
-def loadwelcome(file):
-    with open(file) as f:
-        text = f.read()
-    return text
 

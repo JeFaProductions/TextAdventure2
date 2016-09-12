@@ -1,3 +1,4 @@
+import os
 import tead.event
 import pyfiglet
 
@@ -25,7 +26,7 @@ class CommandParser:
     def _cmdStart(self, args):
         figlet = pyfiglet.Figlet("starwars")
         self._gui.output(figlet.renderText("nope"))
-        self._gui.output("\r\n")
+        self._gui.output(os.linesep)
 
     def _cmdHelp(self, args):
         lines = ['',
@@ -42,7 +43,7 @@ class CommandParser:
             lines.append(key.ljust(10) + '-- ' + value.help)
         
         lines.append('')
-        self._gui.output('\n'.join(lines)) 
+        self._gui.output(os.linesep.join(lines)) 
                    
         
     def _onTextEntered(self, event):
@@ -53,7 +54,7 @@ class CommandParser:
         
         if event.userParam['args'][0] not in self._commands:
             self._gui.output('Unknown command "' +
-                             ' '.join(event.userParam['args']) + '"\n')
+                             ' '.join(event.userParam['args']) + '"' + os.linesep)
             return
         
         self._commands[cmd].callback(event.userParam['args'])
