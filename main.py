@@ -1,4 +1,3 @@
-import tkinter as tk
 import tead.event as evt
 import tead.gui as gui
 import tead.command as cmd
