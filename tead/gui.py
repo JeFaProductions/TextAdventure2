@@ -1,11 +1,34 @@
 import tkinter as tk
 import os
 
-# Global "theme" for all widgets.
-conf = dict(
-    bg="black", fg="white", selectbackground="grey", insertbackground="white",
-    borderwidth=5, font="Courier 8 bold", highlightthickness=0, highlightbackground="yellow",
-    inactiveselectbackground="grey")
+# Global configuration parameters to easily change the style.
+config = dict(
+    # Global "theme" for all widgets.
+    theme=dict(
+        bg="black",
+        fg="white",
+        selectbackground="grey",
+        insertbackground="white",
+        borderwidth=3,
+        font="Courier 9 bold",
+        highlightthickness=0,
+        highlightbackground="yellow",
+        inactiveselectbackground="grey",
+    ),
+    # File path, text, etc.
+    files=dict(
+        icon_file_win="res/icon.ico",
+        icon_file_linux="res/icon.xbm",
+        welcome_text_file="res/welcome_text",
+        title="TEAD",
+        default_width=800,
+        default_height=600,
+        default_infoleft="https://github.com/JeFaProductions/TextAdventure2",
+        default_infocenter="Text Adventure 2",
+        default_inforight="GUI prototype",
+        default_prompt=">"
+    )
+)
 
 
 class ReadonlyText(tk.Frame):
@@ -15,13 +38,19 @@ class ReadonlyText(tk.Frame):
         self.text = tk.Text(self)
 
         self.text.config(state="disabled", wrap=tk.WORD)
-        self.text.config(**conf)
+        self.text.config(**config["theme"])
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
         self.text.grid(row=0, column=0, sticky=tk.N + tk.E + tk.S + tk.W)
 
     def delete(self, indexfrom, indexto):
+        """
+        Deletes text in the output field.
+
+        :param indexfrom: Tkinter index
+        :param indexto:  Tkinter index
+        """
         self.text.config(state="normal")
         self.text.delete(indexfrom, indexto)
         self.text.config(state="disabled")
@@ -32,6 +61,11 @@ class ReadonlyText(tk.Frame):
         self.text.config(state="disabled")
 
     def putln(self, text):
+        """
+        Adds a linebreak to the text and prints it on the output field.
+
+        :param text: String
+        """
         self.put(text + os.linesep)
 
 
@@ -58,8 +92,6 @@ class Inventory(ReadonlyText):
         self.text.bind("<Button-1>", lambda e: "break")
         self.text.bind("<Double-Button-1>", lambda e: "break")
         self.text.bind("<B1-Motion>", lambda e: "break")
-
-        # self.text.tag_add("sel", "1.0", "1.end")
 
         self._rowmark()
 
@@ -126,7 +158,7 @@ class TextInput(tk.Frame):
         self.text = tk.Text(self)
 
         self.text.config(height=1, wrap="none")
-        self.text.config(**conf)
+        self.text.config(**config["theme"])
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(0, weight=1)
@@ -153,15 +185,13 @@ class TextInput(tk.Frame):
 
 
 class Prompt(tk.Text):
-    DEFAULT_PROMPT = ">"
-
     def __init__(self, master=None):
         super().__init__(master)
 
-        self.setPrompt(self.DEFAULT_PROMPT)
+        self.setPrompt(config["files"]["default_prompt"])
 
         self.config(width=2, height=1, state="disabled")
-        self.config(**conf)
+        self.config(**config["theme"])
 
     def setPrompt(self, prompt):
         if len(prompt) is 1:
@@ -179,24 +209,26 @@ class InfoBar(tk.Frame):
 
         self.config(height=20, bg=self.bgcolor)
 
+        font = config["theme"]["font"]
+
         self.infoleft = tk.Label(self)
-        self.infoleft.config(bg=self.bgcolor, font=conf["font"])
+        self.infoleft.config(bg=self.bgcolor, font=font)
         self.infoleft.grid(row=0, column=0, sticky=tk.W)
 
         self.infocenter = tk.Label(self)
-        self.infocenter.config(bg=self.bgcolor, font=conf["font"])
+        self.infocenter.config(bg=self.bgcolor, font=font)
         self.infocenter.grid(row=0, column=1)
 
         self.inforight = tk.Label(self)
-        self.inforight.config(bg=self.bgcolor, font=conf["font"])
+        self.inforight.config(bg=self.bgcolor, font=font)
         self.inforight.grid(row=0, column=2, sticky=tk.E)
 
         self.rowconfigure(0, weight=1)
         self.columnconfigure(1, weight=1)
 
-        self.outleft("https://github.com/JeFaProductions/TextAdventure2")
-        self.outcenter("Text Adventure 2")
-        self.outright("GUI prototype")
+        self.outleft(config["files"]["default_infoleft"])
+        self.outcenter(config["files"]["default_infocenter"])
+        self.outright(config["files"]["default_inforight"])
 
         self._setupevents()
 
@@ -232,23 +264,8 @@ class InfoBar(tk.Frame):
 
 
 class MainWindow(tk.Frame):
-
-    ICON_FILE_WIN = "res/icon.ico"
-    ICON_FILE_LINUX = "res/icon.xbm"
-
     def __init__(self, master=None):
         super().__init__(master)
-
-        self.config(bg="black")
-
-        self.master.title("TEAD")
-
-        if os.name == "nt":
-            self.master.wm_iconbitmap(bitmap=os.path.normpath(self.ICON_FILE_WIN))
-        else:
-            self.master.wm_iconbitmap(bitmap="@" + os.path.normpath(self.ICON_FILE_LINUX))
-
-        self.master.geometry('{}x{}'.format(800, 600))
 
         self.infobar = None
         self.textout = None
@@ -256,17 +273,34 @@ class MainWindow(tk.Frame):
         self.textprompt = None
         self.textin = None
 
-        self.setupframes()
-        self.setupevents()
+        self._setupstyle()
+        self._setupframes()
+        self._setupevents()
 
-        welcomefile = "res/welcome_text"
+        welcomefile = config["files"]["welcome_text_file"]
         with open(welcomefile) as f:
             text = f.read()
         self.output(text)
 
         self.textin.focus()
 
-    def setupframes(self):
+    def _setupstyle(self):
+        self.config(bg="black")
+
+        self.master.title(config["files"]["title"])
+
+        if os.name == "nt":
+            self.master.wm_iconbitmap(
+                bitmap=os.path.normpath(config["files"]["icon_file_win"]))
+        else:
+            self.master.wm_iconbitmap(
+                bitmap="@" + os.path.normpath(config["files"]["icon_file_linux"]))
+
+        self.master.geometry('{}x{}'.format(
+            config["files"]["default_width"],
+            config["files"]["default_height"]))
+
+    def _setupframes(self):
         self.master.config(bg="black", borderwidth=1)
 
         # Make it resizable
@@ -307,7 +341,7 @@ class MainWindow(tk.Frame):
 
         bottomframe.grid(row=2, column=0, sticky=tk.N + tk.E + tk.W + tk.S)
 
-    def setupevents(self):
+    def _setupevents(self):
         # GUI events
         self.master.bind("<Escape>", self._onEscape)
         self.textin.text.bind("<Tab>", self._onTab)
@@ -329,4 +363,9 @@ class MainWindow(tk.Frame):
         self.textprompt.setPrompt("#")
 
     def output(self, text):
+        """
+        Prints the the text on the output text field.
+
+        :param text: String
+        """
         self.textout.put(text)
