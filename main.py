@@ -5,26 +5,26 @@ import tead.command as cmd
 import tead.game as game
 
 EVENT_SYSTEM = None
-ROOT = None
 GUI = None
 CMD_PARSER = None
 WORLD = None
 
-def processInput (text):
+
+def processInput(text):
     args = text.rstrip().lstrip().split()
 
     # create Event that text was entered on console
     EVENT_SYSTEM.createEvent(
-        evt.Event(evt.TEXT_ENTERED, {'args' : args}))
+        evt.Event(evt.TEXT_ENTERED, {'args': args}))
 
     EVENT_SYSTEM.processEvents()
+
 
 if __name__ == '__main__':
     EVENT_SYSTEM = evt.EventSystem()
 
-    ROOT = tk.Tk()
-    GUI = gui.MainWindow(ROOT)
-    GUI.textin.setOnReturn(processInput)
+    GUI = gui.MainWindow()
+    GUI.setOnReturn(processInput)
 
     WORLD = game.World(EVENT_SYSTEM)
 

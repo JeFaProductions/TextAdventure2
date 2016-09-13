@@ -372,3 +372,11 @@ class MainWindow(tk.Frame):
 
     def outputln(self, text):
         self.textout.putln(text)
+
+    def setOnReturn(self, cb):
+        """
+        Sets the callback function for return input.
+
+        :param cb: Function that is called on return.
+        """
+        self.textin.setOnReturn(cb)
