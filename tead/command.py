@@ -10,14 +10,16 @@ class Command:
 
 class CommandParser:
 
-    def __init__(self, eventSystem, gui):
+    def __init__(self, eventSystem, world, gui):
         self._eventSystem = eventSystem
+        self._world = world
         self._gui = gui
 
         # command mapping
         self._commands = {
             'start' : Command(self._cmdStart, 'start the game'),
-            'help'  : Command(self._cmdHelp, 'show help text')
+            'help'  : Command(self._cmdHelp, 'show help text'),
+            'goto'  : Command(self._cmdGoto, 'go to a direction: NORTH, SOUTH, EAST, WEST')
         }
 
         self._eventSystem.registerEventHander(tead.event.TEXT_ENTERED,
@@ -47,6 +49,11 @@ class CommandParser:
         lines.append('')
         self._gui.output(os.linesep.join(lines))
 
+    def _cmdGoto(self, args):
+        if len(args) < 2:
+            self._gui.outputln('Missing direction.')
+
+        self._world.gotoDirectionStr(args[1])
 
     def _onTextEntered(self, event):
         if len(event.userParam['args']) == 0:

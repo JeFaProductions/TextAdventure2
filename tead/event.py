@@ -1,6 +1,7 @@
 import queue
 
 TEXT_ENTERED = 'textEntered'
+ROOM_ENTERED = 'roomEntered'
 
 class Event:
 

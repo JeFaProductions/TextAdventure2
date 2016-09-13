@@ -330,3 +330,6 @@ class MainWindow(tk.Frame):
 
     def output(self, text):
         self.textout.put(text)
+
+    def outputln(self, text):
+        self.textout.putln(text)

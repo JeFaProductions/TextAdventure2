@@ -1,29 +1,33 @@
 import tkinter as tk
-import tead.event
-import tead.gui
-import tead.command
+import tead.event as evt
+import tead.gui as gui
+import tead.command as cmd
+import tead.game as game
 
 EVENT_SYSTEM = None
 ROOT = None
 GUI = None
 CMD_PARSER = None
+WORLD = None
 
 def processInput (text):
     args = text.rstrip().lstrip().split()
 
     # create Event that text was entered on console
     EVENT_SYSTEM.createEvent(
-        tead.event.Event(tead.event.TEXT_ENTERED, {'args' : args}))
+        evt.Event(evt.TEXT_ENTERED, {'args' : args}))
 
     EVENT_SYSTEM.processEvents()
 
 if __name__ == '__main__':
-    EVENT_SYSTEM = tead.event.EventSystem()
+    EVENT_SYSTEM = evt.EventSystem()
 
     ROOT = tk.Tk()
-    GUI = tead.gui.MainWindow(ROOT)
+    GUI = gui.MainWindow(ROOT)
     GUI.textin.setOnReturn(processInput)
 
-    CMD_PARSER = tead.command.CommandParser(EVENT_SYSTEM, GUI)
+    WORLD = game.World(EVENT_SYSTEM)
+
+    CMD_PARSER = cmd.CommandParser(EVENT_SYSTEM, WORLD, GUI)
 
     GUI.mainloop()
