@@ -369,3 +369,6 @@ class MainWindow(tk.Frame):
         :param text: String
         """
         self.textout.put(text)
+
+    def outputln(self, text):
+        self.textout.putln(text)
