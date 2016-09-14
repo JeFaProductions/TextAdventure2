@@ -33,8 +33,8 @@ class Door:
 
 class Room:
     def __init__(self):
-        self.id = ''
-        self.name = ''
+        self.id = None
+        self.name = None
         self.doors = {
             _DIRECTION.NORTH: None,
             _DIRECTION.EAST: None,
