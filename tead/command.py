@@ -1,5 +1,4 @@
 import os
-import tead.event
 import pyfiglet
 
 class Command:
@@ -10,8 +9,7 @@ class Command:
 
 class CommandParser:
 
-    def __init__(self, eventSystem, world, gui):
-        self._eventSystem = eventSystem
+    def __init__(self, world, gui):
         self._world = world
         self._gui = gui
 
@@ -21,9 +19,6 @@ class CommandParser:
             'help'  : Command(self._cmdHelp, 'show help text'),
             'goto'  : Command(self._cmdGoto, 'go to a direction: NORTH, SOUTH, EAST, WEST')
         }
-
-        self._eventSystem.registerEventHander(tead.event.TEXT_ENTERED,
-                                              self._onTextEntered)
 
     def _cmdStart(self, args):
         figlet = pyfiglet.Figlet("starwars")
@@ -55,15 +50,15 @@ class CommandParser:
 
         self._world.gotoDirectionStr(args[1])
 
-    def _onTextEntered(self, event):
-        if len(event.userParam['args']) == 0:
+    def parse(self, args):
+        if len(args) == 0:
             return
 
-        cmd = event.userParam['args'][0]
+        cmd = args[0]
 
-        if event.userParam['args'][0] not in self._commands:
+        if args[0] not in self._commands:
             self._gui.output('Unknown command "' +
-                             ' '.join(event.userParam['args']) + '"' + os.linesep)
+                             ' '.join(args) + '"' + os.linesep)
             return
 
-        self._commands[cmd].callback(event.userParam['args'])
+        self._commands[cmd].callback(args)
