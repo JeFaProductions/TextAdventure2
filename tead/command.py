@@ -47,6 +47,7 @@ class CommandParser:
     def _cmdGoto(self, args):
         if len(args) < 2:
             self._gui.outputln('Missing direction.')
+            return
 
         self._world.gotoDirectionStr(args[1])
 
@@ -54,11 +55,13 @@ class CommandParser:
         if len(args) == 0:
             return
 
+        self._gui.outputln('> ' + ' '.join(args))
+
         cmd = args[0]
 
         if args[0] not in self._commands:
-            self._gui.output('Unknown command "' +
-                             ' '.join(args) + '"' + os.linesep)
+            self._gui.outputln('Unknown command "' +
+                             ' '.join(args) + '"')
             return
 
         self._commands[cmd].callback(args)

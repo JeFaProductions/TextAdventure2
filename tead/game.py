@@ -60,11 +60,12 @@ class Room:
 
 
 class World:
-    def __init__(self, eventSystem):
+    def __init__(self, eventSystem, gui):
         self.currentRoomID = None
         self.player = Player()
         self.rooms = dict()
         self._eventSystem = eventSystem
+        self._gui = gui
 
     def addRoom(self, room):
         self.rooms[room.id] = room
@@ -72,7 +73,7 @@ class World:
     def gotoDirectionStr(self, directionStr):
         directionStr = directionStr.upper()
         if directionStr not in _DIRECTION.__members__:
-            # TODO print 'invalid direction'
+            self._gui.outputln('Invalid direction.')
             return
 
         direction = _DIRECTION[directionStr]
@@ -80,16 +81,16 @@ class World:
         self.gotoDirection(direction)
 
     def gotoDirection(self, direction):
-        assert (self.currentRoomID in self.rooms)
+        assert(self.currentRoomID in self.rooms)
 
         currRoom = self.rooms[self.currentRoomID]
 
         if not currRoom.hasDoor(direction):
-            # TODO print 'no door in this direction'
+            self._gui.outputln('There is no door in this direction.')
             return
 
         if not currRoom.doors[direction].locked:
-            # TODO print 'door is locked'
+            self._gui.outputln('The door is locked.')
             return
 
         self.currentRoomID = currRoom.doors[direction].nextRoom
