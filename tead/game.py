@@ -8,8 +8,8 @@ _DIRECTION = enum.Enum(
 
 class Item:
     def __init__(self):
-        self.id = ''
-        self.name = ''
+        self.id = None
+        self.name = None
 
 
 class Player:
@@ -28,7 +28,7 @@ class Player:
 class Door:
     def __init__(self, locked=False):
         self.locked = locked
-        self.nextRoom = ''
+        self.nextRoom = None
 
 
 class Room:
@@ -61,7 +61,7 @@ class Room:
 
 class World:
     def __init__(self, eventSystem):
-        self.currentRoomID = ''
+        self.currentRoomID = None
         self.player = Player()
         self.rooms = dict()
         self._eventSystem = eventSystem
